@@ -35,7 +35,7 @@
       {% for d in data %}
       <li>
         <input class="check-completed" type="checkbox" data-id="{{ d.id }}" {% if d.completed %}
-        checked {% endif %} />
+        checked{%endif%} />
         {{ d.description }}
         <button class ="delete-button"  data-id="{{ d.id}}">&cross;</button>
       </li>
@@ -48,8 +48,25 @@
       for (let i = 0; i < deleteButtons.length; i++) {
         const deleteButton = deleteButtons[i];
         deleteButton.onclick = function(e) {
-          const newCompleted = e.target.checked;
+          const newDeleted = e.target.checked;
           console.log('event', e);
+          const todoId = e.target.dataset['id']
+          console.log(todoId)
+          fetch('/todos/'+todoId, {
+            method: 'DELETE',
+            body: JSON.stringify({
+              'deleted': newDeleted
+            }),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+          .then(function() {
+            document.getElementById('error').className = 'hidden';
+          })
+          .catch(function() {
+            document.getElementById('error').className = '';
+          })
         }
       }
 
