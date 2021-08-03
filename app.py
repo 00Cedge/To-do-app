@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, abort, jsonify
+from flask import Flask, render_template, request, abort, jsonify, redirect, url_for
 import sys
 
 from flask_sqlalchemy import SQLAlchemy
@@ -25,28 +25,44 @@ def __repr__(self):
 
 @app.route('/todos/create', methods=['POST'])
 def create_todo():
-  error = False
-  body = {}
+    error = False
+    body = {}
+    try:
+        description = request.get_json()['description']
+        todo = Todo(description=description)
+        db.session.add(todo)
+        db.session.commit()
+        body['description'] = todo.description
+    except:
+        error = True
+        db.session.rollback()
+        print(sys.exc_info())
+    finally:
+        db.session.close()
+    if error:
+        abort (400)
+    else:
+        return jsonify(body)
+
+
+@app.route('/todos/<todo_id>/set-completed', methods=['POST'])
+def set_completed_todo(todo_id):
   try:
-    description = request.get_json()['description']
-    todo = Todo(description=description)
-    db.session.add(todo)
+    completed = request.get_json()['completed']
+    print('completed', completed)
+    todo = Todo.query.get(todo_id)
+    todo.completed = completed
     db.session.commit()
-    body['description'] = todo.description
   except:
-    error = True
     db.session.rollback()
-    print(sys.exc_info())
   finally:
     db.session.close()
-  if error:
-    abort (400)
-  else:
-    return jsonify(body)
+  return redirect(url_for('index'))
+
 
 @app.route('/')
 def index():
-    return render_template('index.html', data=Todo.query.all())
+    return render_template('index.html', data=Todo.query.order_by('id').all())
 
 
 if __name__ == '__main__':
