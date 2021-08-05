@@ -26,9 +26,7 @@ def upgrade():
     op.add_column('todos', sa.Column('list_id', sa.Integer(), nullable=True))
     op.create_foreign_key(None, 'todos', 'todolists', ['list_id'], ['id'])
 
-    op.execute('UPDATE todos SET list_id = False WHERE list_id IS NULL;')
     # ### end Alembic commands ###
-    op.alter_column('todos', 'list_id', nullable=False)
 
 
 

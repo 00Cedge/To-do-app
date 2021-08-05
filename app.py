@@ -13,12 +13,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-class TodoList(db.Model):
-    __tablename__ = 'todolists'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(), nullable=False)
-    todos = db.relationship('Todo', backref='list', lazy=True)
-
 class Todo(db.Model):
     __tablename__ = 'todos'
     id = db.Column(db.Integer, primary_key=True)
@@ -29,6 +23,11 @@ class Todo(db.Model):
 def __repr__(self):
     return f'<Todo {self.id} {self.description}>'
 
+class TodoList(db.Model):
+    __tablename__ = 'todolists'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(), nullable=False)
+    todos = db.relationship('Todo', backref='list', lazy=True)
 
 @app.route('/todos/create', methods=['POST'])
 def create_todo():
